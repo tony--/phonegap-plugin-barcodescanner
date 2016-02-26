@@ -50,6 +50,7 @@
     <platform name="android">
 
         <source-file src="src/android/com/phonegap/plugins/barcodescanner/BarcodeScanner.java" target-dir="src/com/phonegap/plugins/barcodescanner" />
+        <source-file src="src/android/com/phonegap/plugins/barcodescanner/PermissionHelper.java" target-dir="src/com/phonegap/plugins/barcodescanner" />
         <!--
         <source-file src="R.java" target-dir="src/com/google/zxing/client/android" />
         -->
