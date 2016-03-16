@@ -530,9 +530,7 @@ parentViewController:(UIViewController*)parentViewController
         const char* cString      = resultText->getText().c_str();
         NSString*   resultString = [[NSString alloc] initWithCString:cString encoding:NSUTF8StringEncoding];
         
-        if ([self checkResult:resultString]) {
-            [self barcodeScanSucceeded:resultString format:format];
-        }
+        [self barcodeScanSucceeded:resultString format:format];
         
         
         
