@@ -12,8 +12,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import org.apache.cordova.CordovaPlugin;
@@ -47,6 +49,11 @@ public class BarcodeScanner extends CordovaPlugin {
     private static final String SMS_TYPE = "SMS_TYPE";
 
     private static final String LOG_TAG = "BarcodeScanner";
+
+    protected final static String[] permissions = { Manifest.permission.CAMERA };
+    public static final int PERMISSION_GRANTED_SCAN = 0;
+    public static final int PERMISSION_DENIED_ERROR = 20;
+    private JSONArray scanArgs; // scan arguments (needs to be saved for permission handling)
 
     private CallbackContext callbackContext;
 
@@ -98,11 +105,20 @@ public class BarcodeScanner extends CordovaPlugin {
                 return true;
             }
         } else if (action.equals(SCAN)) {
-            scan(args);
+            callScan(args);
         } else {
             return false;
         }
         return true;
+    }
+
+    public void callScan(JSONArray args) {
+        if (PermissionHelper.hasPermission(this, permissions[0])) {
+            scan(args);
+        } else {
+            this.scanArgs = args;
+            PermissionHelper.requestPermission(this, PERMISSION_GRANTED_SCAN, Manifest.permission.CAMERA);
+        }
     }
 
     /**
@@ -211,4 +227,25 @@ public class BarcodeScanner extends CordovaPlugin {
 
         this.cordova.getActivity().startActivity(intentEncode);
     }
+
+    public void onRequestPermissionResult(int requestCode, String[] permissions,
+                                          int[] grantResults) throws JSONException
+    {
+        for(int r:grantResults)
+        {
+            if(r == PackageManager.PERMISSION_DENIED)
+            {
+                this.callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, PERMISSION_DENIED_ERROR));
+                return;
+            }
+        }
+        switch(requestCode)
+        {
+            case PERMISSION_GRANTED_SCAN:
+                JSONArray args = this.scanArgs;
+                this.scanArgs = null;
+                scan(args);
+                break;
+        }
+    }    
 }
